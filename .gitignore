@@ -1,0 +1,10 @@
+.venv/
+__pycache__/
+*.pyc
+.DS_Store
+results/matches/*
+results/logs/*
+results/figures/*
+!results/matches/.gitkeep
+!results/logs/.gitkeep
+!results/figures/.gitkeep
