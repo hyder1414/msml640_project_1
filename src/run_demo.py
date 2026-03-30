@@ -9,16 +9,20 @@ from utils import list_image_paths, save_image
 
 def build_argparser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Run SIFT bag detection on one image or an entire folder.")
-    parser.add_argument("--reference-dir", type=Path, default=Path("data/reference"))
+    parser.add_argument("--reference-dir", type=Path, default=Path("data/reference_v2"))
     parser.add_argument("--scene", type=Path, default=None, help="Single scene image to evaluate.")
     parser.add_argument("--scene-dir", type=Path, default=None, help="Folder of scene images to evaluate.")
-    parser.add_argument("--output-dir", type=Path, default=Path("results/demo"))
-    parser.add_argument("--ratio-test", type=float, default=0.75)
-    parser.add_argument("--min-good", type=int, default=10)
-    parser.add_argument("--min-inliers", type=int, default=8)
-    parser.add_argument("--max-dim", type=int, default=1200)
+    parser.add_argument("--output-dir", type=Path, default=Path("results/demo_v2"))
+    parser.add_argument("--ratio-test", type=float, default=0.55)
+    parser.add_argument("--min-good", type=int, default=12)
+    parser.add_argument("--min-inliers", type=int, default=12)
+    parser.add_argument("--max-dim", type=int, default=1000)
     parser.add_argument("--blur-ksize", type=int, default=0)
-    parser.add_argument("--disable-clahe", action="store_true")
+    parser.add_argument(
+        "--use-clahe",
+        action="store_true",
+        help="Enable CLAHE preprocessing. Default is off for the final v2 setup.",
+    )
     return parser
 
 
@@ -34,7 +38,7 @@ def main() -> None:
         min_inliers=args.min_inliers,
         max_dim=args.max_dim,
         blur_ksize=args.blur_ksize,
-        use_clahe=not args.disable_clahe,
+        use_clahe=args.use_clahe,
     )
     detector = SIFTDetector(config)
     references = detector.load_references([str(p) for p in list_image_paths(args.reference_dir)])

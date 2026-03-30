@@ -23,12 +23,12 @@ class SIFTConfig:
     contrast_threshold: float = 0.04
     edge_threshold: float = 10
     sigma: float = 1.6
-    ratio_test: float = 0.30
-    min_good_matches: int = 10
-    min_inliers: int = 10 
+    ratio_test: float = 0.55
+    min_good_matches: int = 12
+    min_inliers: int = 12
     ransac_reproj_threshold: float = 5.0
-    max_dim: int = 1200
-    use_clahe: bool = True
+    max_dim: int = 1000
+    use_clahe: bool = False
     blur_ksize: int = 0
     max_draw_matches: int = 50
 

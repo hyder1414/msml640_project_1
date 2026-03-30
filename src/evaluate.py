@@ -67,18 +67,22 @@ def evaluate_split(
 
 def build_argparser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Evaluate bag-detection scenes with a SIFT pipeline.")
-    parser.add_argument("--reference-dir", type=Path, default=Path("data/reference"))
-    parser.add_argument("--positive-dir", type=Path, default=Path("data/scene"))
-    parser.add_argument("--negative-dir", type=Path, default=Path("data/negative"))
-    parser.add_argument("--output-csv", type=Path, default=Path("results/logs/bag_evaluation.csv"))
-    parser.add_argument("--matches-dir", type=Path, default=Path("results/matches"))
-    parser.add_argument("--overlays-dir", type=Path, default=Path("results/figures"))
-    parser.add_argument("--ratio-test", type=float, default=0.75)
-    parser.add_argument("--min-good", type=int, default=10)
-    parser.add_argument("--min-inliers", type=int, default=8)
-    parser.add_argument("--max-dim", type=int, default=1200)
+    parser.add_argument("--reference-dir", type=Path, default=Path("data/reference_v2"))
+    parser.add_argument("--positive-dir", type=Path, default=Path("data/scene_positive_v2"))
+    parser.add_argument("--negative-dir", type=Path, default=Path("data/scene_negative_v2"))
+    parser.add_argument("--output-csv", type=Path, default=Path("results/logs/bag_eval_v2.csv"))
+    parser.add_argument("--matches-dir", type=Path, default=Path("results/matches_v2"))
+    parser.add_argument("--overlays-dir", type=Path, default=Path("results/figures_v2"))
+    parser.add_argument("--ratio-test", type=float, default=0.55)
+    parser.add_argument("--min-good", type=int, default=12)
+    parser.add_argument("--min-inliers", type=int, default=12)
+    parser.add_argument("--max-dim", type=int, default=1000)
     parser.add_argument("--blur-ksize", type=int, default=0)
-    parser.add_argument("--disable-clahe", action="store_true")
+    parser.add_argument(
+        "--use-clahe",
+        action="store_true",
+        help="Enable CLAHE preprocessing. Default is off for the final v2 setup.",
+    )
     return parser
 
 
@@ -92,7 +96,7 @@ def main() -> None:
         min_inliers=args.min_inliers,
         max_dim=args.max_dim,
         blur_ksize=args.blur_ksize,
-        use_clahe=not args.disable_clahe,
+        use_clahe=args.use_clahe,
     )
     detector = SIFTDetector(config)
 
