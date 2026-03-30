@@ -7,7 +7,7 @@ from typing import List, Optional
 import cv2
 import numpy as np
 
-from utils import (
+from Utils import (
     draw_detection_polygon,
     draw_matches_image,
     load_bgr,
