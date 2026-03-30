@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional
+from typing import List, Optional
 
 import cv2
 import numpy as np
@@ -11,6 +11,7 @@ from utils import (
     draw_detection_polygon,
     draw_matches_image,
     load_bgr,
+    polygon_is_reasonable,
     preprocess_for_sift,
     resize_max_dim,
 )
@@ -24,7 +25,7 @@ class SIFTConfig:
     sigma: float = 1.6
     ratio_test: float = 0.75
     min_good_matches: int = 10
-    min_inliers: int = 6
+    min_inliers: int = 8
     ransac_reproj_threshold: float = 5.0
     max_dim: int = 1200
     use_clahe: bool = True
@@ -70,7 +71,6 @@ class SIFTDetector:
             raise RuntimeError(
                 "OpenCV SIFT is not available. Install opencv-contrib-python and try again."
             )
-
         return cv2.SIFT_create(
             nfeatures=self.config.nfeatures,
             contrastThreshold=self.config.contrast_threshold,
@@ -81,15 +81,12 @@ class SIFTDetector:
     def load_reference(self, path: str | Path) -> ReferenceFeatures:
         bgr = load_bgr(path)
         bgr, _ = resize_max_dim(bgr, self.config.max_dim)
-
         gray = preprocess_for_sift(
             bgr,
             use_clahe=self.config.use_clahe,
             blur_ksize=self.config.blur_ksize,
         )
-
         keypoints, descriptors = self.sift.detectAndCompute(gray, None)
-
         return ReferenceFeatures(
             path=Path(path),
             bgr=bgr,
@@ -99,20 +96,21 @@ class SIFTDetector:
             shape=bgr.shape,
         )
 
+    def load_references(self, paths: List[str | Path]) -> List[ReferenceFeatures]:
+        return [self.load_reference(p) for p in paths]
+
     def _prepare_scene(self, path: str | Path):
         bgr = load_bgr(path)
         bgr, _ = resize_max_dim(bgr, self.config.max_dim)
-
         gray = preprocess_for_sift(
             bgr,
             use_clahe=self.config.use_clahe,
             blur_ksize=self.config.blur_ksize,
         )
-
         keypoints, descriptors = self.sift.detectAndCompute(gray, None)
         return Path(path), bgr, gray, keypoints, descriptors
 
-    def _ratio_test(self, knn_matches):
+    def _ratio_test(self, knn_matches) -> list:
         good = []
         for pair in knn_matches:
             if len(pair) < 2:
@@ -120,7 +118,7 @@ class SIFTDetector:
             m, n = pair
             if m.distance < self.config.ratio_test * n.distance:
                 good.append(m)
-        return good
+        return sorted(good, key=lambda m: m.distance)
 
     def detect_with_reference(
         self,
@@ -186,11 +184,11 @@ class SIFTDetector:
                 total_scene_keypoints=len(scene_kps),
                 total_reference_keypoints=len(reference.keypoints),
                 homography_found=False,
-                confidence=len(good_matches) / max(self.config.min_good_matches, 1),
+                confidence=min(0.49, len(good_matches) / max(self.config.min_good_matches, 1)),
                 polygon=None,
                 match_vis=match_vis,
                 overlay_vis=draw_detection_polygon(scene_bgr, None, label="NO DETECTION"),
-                note="Too few good matches after ratio test.",
+                note="Too few good matches after Lowe ratio test.",
             )
 
         ref_pts = np.float32(
@@ -217,11 +215,11 @@ class SIFTDetector:
                 total_scene_keypoints=len(scene_kps),
                 total_reference_keypoints=len(reference.keypoints),
                 homography_found=False,
-                confidence=0.5,
+                confidence=0.45,
                 polygon=None,
                 match_vis=match_vis,
                 overlay_vis=draw_detection_polygon(scene_bgr, None, label="NO DETECTION"),
-                note="Homography estimation failed.",
+                note="Homography could not be estimated.",
             )
 
         inliers = int(mask.ravel().sum())
@@ -232,14 +230,23 @@ class SIFTDetector:
         ).reshape(-1, 1, 2)
 
         polygon = cv2.perspectiveTransform(ref_corners, H)
+        polygon_ok = polygon_is_reasonable(polygon, scene_bgr.shape)
 
-        detected = inliers >= self.config.min_inliers
-        confidence = 0.6 * (inliers / max(self.config.min_inliers, 1)) + 0.4 * (
-            len(good_matches) / max(self.config.min_good_matches, 1)
+        detected = inliers >= self.config.min_inliers and polygon_ok
+        confidence = min(
+            1.0,
+            0.5 * (len(good_matches) / max(self.config.min_good_matches, 1))
+            + 0.5 * (inliers / max(self.config.min_inliers, 1)),
         )
 
         label = f"DETECTED ({inliers} inliers)" if detected else "NO DETECTION"
         overlay = draw_detection_polygon(scene_bgr, polygon if detected else None, label=label)
+
+        note = (
+            "Successful bag detection."
+            if detected
+            else "Homography exists, but inlier count or polygon quality is too weak."
+        )
 
         return DetectionResult(
             scene_path=scene_path,
@@ -254,5 +261,39 @@ class SIFTDetector:
             polygon=polygon if detected else None,
             match_vis=match_vis,
             overlay_vis=overlay,
-            note="Added homography and inlier filtering.",
+            note=note,
         )
+
+    def detect_with_best_reference(
+        self,
+        references: List[ReferenceFeatures],
+        scene_path: str | Path,
+    ) -> DetectionResult:
+        if not references:
+            raise ValueError("No references were provided.")
+
+        best: DetectionResult | None = None
+        for ref in references:
+            result = self.detect_with_reference(ref, scene_path)
+            if best is None:
+                best = result
+                continue
+
+            best_tuple = (
+                int(best.detected),
+                best.inliers,
+                best.good_matches,
+                best.confidence,
+            )
+            current_tuple = (
+                int(result.detected),
+                result.inliers,
+                result.good_matches,
+                result.confidence,
+            )
+
+            if current_tuple > best_tuple:
+                best = result
+
+        assert best is not None
+        return best
