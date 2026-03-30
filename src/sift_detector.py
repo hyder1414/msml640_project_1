@@ -7,7 +7,7 @@ from typing import List, Optional
 import cv2
 import numpy as np
 
-from Utils import (
+from utils import (
     draw_detection_polygon,
     draw_matches_image,
     load_bgr,
@@ -23,9 +23,9 @@ class SIFTConfig:
     contrast_threshold: float = 0.04
     edge_threshold: float = 10
     sigma: float = 1.6
-    ratio_test: float = 0.75
+    ratio_test: float = 0.30
     min_good_matches: int = 10
-    min_inliers: int = 8
+    min_inliers: int = 10 
     ransac_reproj_threshold: float = 5.0
     max_dim: int = 1200
     use_clahe: bool = True
