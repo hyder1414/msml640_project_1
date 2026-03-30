@@ -2,7 +2,7 @@ import csv
 from pathlib import Path
 
 from sift_detector import SIFTConfig, SIFTDetector
-from utils import ensure_dir, list_image_paths, save_image
+from Utils import ensure_dir, list_image_paths, save_image
 
 
 def write_csv(rows: list[dict], output_csv: Path) -> None:
