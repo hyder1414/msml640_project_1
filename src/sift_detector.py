@@ -31,6 +31,7 @@ class SIFTConfig:
     use_clahe: bool = False
     blur_ksize: int = 0
     max_draw_matches: int = 50
+    
 
 
 @dataclass
