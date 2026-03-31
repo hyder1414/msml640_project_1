@@ -423,3 +423,24 @@ These limitations are expected and are part of the technical analysis.
 AI and External Sources Disclosure
 
  We used external sources only for allowed support tasks such as writing cleanup,streamlit app etc, and presentation wording. The core project idea, dataset collection, SIFT pipeline design, implementation, debugging, parameter tuning, and evaluation logic were completed by the team using several different documentation and lecture slides. 
+
+Links that we used as reference;
+
+
+https://github.com/opencv/opencv_contrib
+https://github.com/opencv/opencv
+https://docs.opencv.org/4.x/d4/d5d/group__features2d__draw.html
+https://docs.opencv.org/4.x/d4/da8/group__imgcodecs.html
+https://docs.opencv.org/4.x/d9/dab/tutorial_homography.html
+https://docs.opencv.org/4.x/dc/dc3/tutorial_py_matcher.html
+https://docs.python.org/3/library/tempfile.html
+https://github.com/daniel1896/Feature-Matching-and-Homography
+https://github.com/jvirico/sift-feature-matching
+https://github.com/mtszkw/matching
+https://github.com/dalgu90/opencv-tutorial/blob/master/4_homography.ipynb
+https://github.com/tobybreckon/python-examples-cv/blob/master/sift_detection.py
+https://github.com/streamlit/streamlit
+https://docs.streamlit.io/develop/api-reference/widgets/st.file_uploader
+https://docs.streamlit.io/develop/api-reference/data/st.dataframe
+https://docs.streamlit.io/develop/api-reference/widgets/st.download_button
+
