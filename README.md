@@ -444,3 +444,6 @@ https://docs.streamlit.io/develop/api-reference/widgets/st.file_uploader
 https://docs.streamlit.io/develop/api-reference/data/st.dataframe
 https://docs.streamlit.io/develop/api-reference/widgets/st.download_button
 
+
+Some promopts that we used for the streamlit not limitted too we looked at the code and shared some code snippit for debug as well for the streamlit app integration . The actual prompt that we used are in doc files. 
+
