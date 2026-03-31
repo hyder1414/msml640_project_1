@@ -8,7 +8,7 @@ import streamlit as st
 import pandas as pd
 
 from sift_detector import SIFTConfig, SIFTDetector, DetectionResult
-from Utils import list_image_paths
+from utils import list_image_paths
 
 
 st.set_page_config(page_title="Almond Bag Detector", layout="wide")
