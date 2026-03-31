@@ -95,13 +95,13 @@ def main() -> None:
 
     with st.sidebar:
         st.header("Settings")
-        reference_dir_text = st.text_input("Reference folder", value="data/reference")
-        ratio_test = st.slider("Ratio test", min_value=0.50, max_value=0.95, value=0.75, step=0.01)
-        min_good = st.number_input("Min good matches", min_value=1, max_value=200, value=10, step=1)
-        min_inliers = st.number_input("Min inliers", min_value=1, max_value=200, value=6, step=1)
-        max_dim = st.number_input("Max dimension", min_value=256, max_value=4000, value=1200, step=64)
+        reference_dir_text = st.text_input("Reference folder", value="data/reference_v2")
+        ratio_test = st.slider("Ratio test", min_value=0.50, max_value=0.95, value=0.55, step=0.01)
+        min_good = st.number_input("Min good matches", min_value=1, max_value=200, value=12, step=1)
+        min_inliers = st.number_input("Min inliers", min_value=1, max_value=200, value=12, step=1)
+        max_dim = st.number_input("Max dimension", min_value=256, max_value=4000, value=1000, step=64)
         blur_ksize = st.number_input("Gaussian blur kernel", min_value=0, max_value=31, value=0, step=1)
-        use_clahe = st.checkbox("Use CLAHE", value=True)
+        use_clahe = st.checkbox("Use CLAHE", value=False)
         detected_only = st.checkbox("Show detected images only", value=False)
 
     uploaded_scenes = st.file_uploader(
